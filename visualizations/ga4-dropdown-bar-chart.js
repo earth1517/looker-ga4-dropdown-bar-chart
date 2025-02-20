@@ -1,13 +1,13 @@
 looker.plugins.visualizations.add({
-  id: "simple_bar_chart",
-  label: "Simple Bar Chart",
+  id: "ga4-dropdown-bar-chart",
+  label: "GA4 - Dropdown Bar Chart",
   create: function(element, config) {
     // Set up the chart container and dropdowns
     element.innerHTML = `
-      <div style="font-family: 'Poppins', sans-serif;">
-                <select id="measure-select" style="font-family: 'Poppins', sans-serif;"></select>
+      <div style="font-family: sans-serif;">
+                <select id="measure-select" style="font-family: sans-serif;"></select>
         <span style="font-family: 'Poppins', sans-serif;"> &nbsp; by &nbsp; </span>
-                <select id="dimension-select" style="font-family: 'Poppins', sans-serif;"></select>
+                <select id="dimension-select" style="font-family: sans-serif;"></select>
       </div>
       <div class="chart-container" style="height: 85%; width: 100%; margin-top: 10px;">
         <!-- Chart will be rendered here -->
@@ -75,7 +75,7 @@ looker.plugins.visualizations.add({
           chartContainer.innerHTML = ''; // Clear previous chart
 
           // Set up the D3.js chart
-          const margin = { top: 10, right: 20, bottom: 40, left: 100 }; // Increase bottom margin for x-axis label
+          const margin = { top: 10, right: 20, bottom: 40, left: 110 }; // Increase bottom margin for x-axis label
           const width = chartContainer.clientWidth - margin.left - margin.right;
           const height = chartContainer.clientHeight - margin.top - margin.bottom;
 
@@ -183,8 +183,8 @@ looker.plugins.visualizations.add({
             .attr("dy", ".35em")
             .attr("text-anchor", "end")
             .text(d => d[dimensionName].length > 15 ? d[dimensionName].substring(0, 15) + '...' : d[dimensionName])
-            .style("font-family", "Calibri, sans-serif")
-            .style("font-size", "13px")
+            .style("font-family", "sans-serif")
+            .style("font-size", "12px")
             .style("font-weight", "400")
             .style("fill", "#000");
 
@@ -197,8 +197,8 @@ looker.plugins.visualizations.add({
             .attr("dy", "1em")
             .attr("text-anchor", "middle")
             .text(dimensionName)
-            .style("font-family", "Calibri, sans-serif")
-            .style("font-size", "13px")
+            .style("font-family", "sans-serif")
+            .style("font-size", "12px")
             .style("font-weight", "400")
             .style("fill", "#000");
 
@@ -209,8 +209,8 @@ looker.plugins.visualizations.add({
             .attr("y", height + margin.bottom - 10)
             .attr("text-anchor", "middle")
             .text(measureName)
-            .style("font-family", "Calibri, sans-serif")
-            .style("font-size", "13px")
+            .style("font-family", "sans-serif")
+            .style("font-size", "12px")
             .style("font-weight", "400")
             .style("fill", "#000");
 
