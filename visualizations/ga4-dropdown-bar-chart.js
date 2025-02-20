@@ -1,158 +1,226 @@
 looker.plugins.visualizations.add({
-  id: "ga4-dropdown-bar-chart",
-  label: "GA4 - Drop-down Bar Chart",
+  id: "simple_bar_chart",
+  label: "Simple Bar Chart",
   create: function(element, config) {
-
-    // Insert a <style> tag with updated styles for layout, headings, and content
+    // Set up the chart container and dropdowns
     element.innerHTML = `
-    <style>
-      @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&display=swap');
+      <div style="font-family: 'Poppins', sans-serif;">
+                <select id="measure-select" style="font-family: 'Poppins', sans-serif;"></select>
+        <span style="font-family: 'Poppins', sans-serif;"> &nbsp; by &nbsp; </span>
+                <select id="dimension-select" style="font-family: 'Poppins', sans-serif;"></select>
+      </div>
+      <div class="chart-container" style="height: 85%; width: 100%; margin-top: 10px;">
+        <!-- Chart will be rendered here -->
+      </div>
+    `;
 
-      .hello-world-vis {
-        height: 100%;
-        display: flex;
-        flex-direction: column; /* Stack rows */
-        text-align: left;
-        font-family: 'Kanit', sans-serif;
-        padding: 20px;
-        gap: 15px;
-      }
+    // Load D3.js library
+    const script = document.createElement('script');
+    script.src = 'https://d3js.org/d3.v6.min.js';
+    script.async = true;
+    document.body.appendChild(script);
 
-      .hello-world-header {
-        font-size: 1.5em;
-        font-weight: 400; /* Regular font weight for header */
-        text-align: left; /* Align header to the left */
-        margin-bottom: 20px;
-        color: #3a4245; /* Change the header color here */
-      }
-
-
-      .hello-world-row {
-        display: flex;
-        gap: 15px;
-        justify-content: space-between;
-      }
-
-      .hello-world-box {
-        flex: 1;
-        padding: 15px;
-        border-radius: 10px;
-        box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
-        font-size: 14px; /* Smaller font size */
-      }
-
-      /* Set background color for the first two boxes */
-      .first-box {
-        background: #57b0f2;
-        color: white;
-      }
-
-      .second-box {
-        background: #57b0f2;
-        color: white;
-      }
-
-      /* Default color for third box */
-      .third-box {
-        background: #f5f5f5; /* Light gray */
-        color: black;
-      }
-
-      .hello-world-heading {
-        font-size: 1em; /* Regular font size for headers */
-        font-weight: 500; /* Regular font weight for headers */
-        margin-bottom: 8px;
-      }
-
-      .hello-world-content {
-        font-size: 12px; /* Light font for content */
-        font-weight: 300; /* Lighter font weight for content */
-      }
-
-      .info-text {
-        font-size: 12px;
-        margin-top: 20px;
-        text-align: center;
-        color: #555;
-        font-style: italic;
-      }
-    </style>
-  `;
-
-    var container = element.appendChild(document.createElement("div"));
-    container.className = "hello-world-vis";
-
-    // Add the "Need help generating content?" header
-    this._header = container.appendChild(document.createElement("div"));
-    this._header.className = "hello-world-header";
-    this._header.innerHTML = "Need help generating content?";
-
-    // First row (2 boxes side by side)
-    var rowContainer = container.appendChild(document.createElement("div"));
-    rowContainer.className = "hello-world-row";
-
-    this._firstBox = rowContainer.appendChild(document.createElement("div"));
-    this._firstBox.className = "hello-world-box first-box"; // Apply first box class
-
-    this._secondBox = rowContainer.appendChild(document.createElement("div"));
-    this._secondBox.className = "hello-world-box second-box"; // Apply second box class
-
-    // Third box (below the first row)
-    this._thirdBox = container.appendChild(document.createElement("div"));
-    this._thirdBox.className = "hello-world-box third-box"; // Apply third box class
-
-    // Add the info text underneath the boxes
-    this._infoText = container.appendChild(document.createElement("div"));
-    this._infoText.className = "info-text";
-    this._infoText.innerHTML = "The Generative Feature operates within a controlled environment, meaning that the generated content may not fully capture the true underlying nature of the selected trending topic. To gain a more comprehensive understanding, please use the 'Explore More' action to learn more about the content.";
+    // Load custom font
+    const fontLink = document.createElement('link');
+    fontLink.href = 'https://fonts.googleapis.com/css2?family=Poppins:wght@100;300;400;500;700&display=swap';
+    fontLink.rel = 'stylesheet';
+    document.head.appendChild(fontLink);
   },
-
-  updateAsync: function(data, element, config, queryResponse, details, done) {
+  updateAsync: function(data, element, config, queryResponse, details, doneRendering) {
     this.clearErrors();
 
-    if (queryResponse.fields.dimensions.length < 3) {
-      this.addError({title: "Not Enough Dimensions", message: "This chart requires at least three dimensions."});
-      return;
-    }
+    // Check if D3 library is loaded
+    let intervalId = setInterval(() => {
+      if (typeof d3 !== 'undefined') {
+        clearInterval(intervalId);
 
-    var firstRow = data[0];
-    var firstCell = firstRow[queryResponse.fields.dimensions[0].name];
-    var secondCell = firstRow[queryResponse.fields.dimensions[1].name];
-    var thirdCell = firstRow[queryResponse.fields.dimensions[2].name];
+        // Extract all dimensions and measures dynamically
+        const dimensions = queryResponse.fields.dimensions;
+        const measures = queryResponse.fields.measures;
 
-    // Format content for all three cells
-    const formattedFirstCell = formatContent(LookerCharts.Utils.htmlForCell(firstCell));
-    const formattedSecondCell = formatContent(LookerCharts.Utils.htmlForCell(secondCell));
-    const formattedThirdCell = formatContent(LookerCharts.Utils.htmlForCell(thirdCell));
+        if (dimensions.length === 0 || measures.length === 0) {
+          this.addError({ title: "No Data", message: "This visualization requires at least one dimension and one measure." });
+          return;
+        }
 
-    // Insert formatted data into the boxes with headings
-    this._firstBox.innerHTML = `<div class="hello-world-heading">Topic</div><div class="hello-world-content">${formattedFirstCell}</div>`;
-    this._secondBox.innerHTML = `<div class="hello-world-heading">User's Prompt</div><div class="hello-world-content">${formattedSecondCell}</div>`;
-    this._thirdBox.innerHTML = `<div class="hello-world-heading">Generated Content</div><div class="hello-world-content">${formattedThirdCell}</div>`;
+        // Populate the dropdowns
+        const dimensionSelect = element.querySelector('#dimension-select');
+        const measureSelect = element.querySelector('#measure-select');
 
-    done();
+        dimensionSelect.innerHTML = dimensions.map(dim => `<option value="${dim.name}">${dim.label}</option>`).join('');
+        measureSelect.innerHTML = measures.map(meas => `<option value="${meas.name}">${meas.label}</option>`).join('');
+
+        // Add event listeners to the dropdowns
+        dimensionSelect.addEventListener('change', () => renderChart());
+        measureSelect.addEventListener('change', () => renderChart());
+
+        // Function to render the chart
+        const renderChart = () => {
+          // Get the selected dimension and measure
+          const dimensionName = dimensionSelect.value || dimensions[0].name;
+          const measureName = measureSelect.value || measures[0].name;
+
+          // Process the data to create the chart-friendly structure
+          let aggregatedData = d3.rollups(
+            data,
+            v => d3.sum(v, d => d[measureName].value),
+            d => d[dimensionName].value
+          ).map(([key, value]) => ({ [dimensionName]: key, [measureName]: value }));
+
+          // Limit the number of bars to 9
+          aggregatedData = aggregatedData.slice(0, 9);
+
+          // Set up the chart container
+          const chartContainer = element.querySelector('.chart-container');
+          chartContainer.innerHTML = ''; // Clear previous chart
+
+          // Set up the D3.js chart
+          const margin = { top: 10, right: 20, bottom: 40, left: 100 }; // Increase bottom margin for x-axis label
+          const width = chartContainer.clientWidth - margin.left - margin.right;
+          const height = chartContainer.clientHeight - margin.top - margin.bottom;
+
+          const svg = d3.select(chartContainer)
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+          // Set up the scales
+          const y = d3.scaleBand()
+            .domain(aggregatedData.map(d => d[dimensionName]))
+            .range([0, height])
+            .padding(0.1); // Increase padding to make bars slimmer and add more space between them
+
+          const x = d3.scaleLinear()
+            .domain([0, d3.max(aggregatedData, d => d[measureName])])
+            .nice()
+            .range([0, width]);
+
+          // Add vertical gridlines
+          svg.append("g")
+          .attr("class", "grid")
+          .call(d3.axisBottom(x)
+            .ticks(3)
+            .tickSize(height)
+            .tickFormat(d3.format(",d")))
+          .selectAll("line")
+          .attr("stroke", "lightgrey");
+
+          // Remove the x-axis line
+          svg.selectAll(".domain").remove(); // Remove the x-axis line
+
+          // Add the bars
+          svg.selectAll(".bar")
+            .data(aggregatedData)
+            .enter()
+            .append("rect")
+            .attr("class", "bar")
+            .attr("x", 0)
+            .attr("y", d => y(d[dimensionName]))
+            .attr("width", d => x(d[measureName]))
+            .attr("height", y.bandwidth())
+            .attr("fill", "#1A73E8")
+            .on("mouseover", function(event, d) {
+              tooltip.transition()
+                .style("opacity", 1);
+              tooltip.html(`
+                <div style="text-align: left;">
+                  ${dimensionName}<br><strong>${d[dimensionName]}</strong><br><br>
+                  ${measureName}<br><strong>${d3.format(",")(d[measureName])}</strong>
+                </div>`)
+                .style("left", (event.pageX + 5) + "px")
+                .style("top", (event.pageY - 28) + "px")
+                .style("color", "white");
+            })
+            .on("mouseout", function(d) {
+              tooltip.transition()
+                // .duration(500)
+                .style("opacity", 0);
+            });
+
+          // Add value labels to each bar
+          svg.selectAll(".label")
+            .data(aggregatedData)
+            .enter()
+            .append("text")
+            .attr("class", "label")
+            .attr("x", d => x(d[measureName]) + 5)
+            .attr("y", d => y(d[dimensionName]) + y.bandwidth() / 2)
+            .attr("dy", ".35em")
+            .attr("text-anchor", "start")
+            .text(d => d3.format(",")(d[measureName])) // Format with commas
+            .style("font-family", "Arial, sans-serif")
+            .style("font-size", "12px")
+            .style("font-weight", "600")
+            .style("fill", "#1A73E8");
+
+          // Add dimension value labels at the axis
+          svg.selectAll(".dimension-label")
+            .data(aggregatedData)
+            .enter()
+            .append("text")
+            .attr("class", "dimension-label")
+            .attr("x", -5) // Align to the left
+            .attr("y", d => y(d[dimensionName]) + y.bandwidth() / 2)
+            .attr("dy", ".35em")
+            .attr("text-anchor", "end")
+            .text(d => d[dimensionName].length > 10 ? d[dimensionName].substring(0, 10) + '...' : d[dimensionName])
+            .style("font-family", "Arial, sans-serif")
+            .style("font-size", "12px")
+            .style("font-weight", "400")
+            .style("fill", "#000");
+
+          // Add y-axis label
+          svg.append("text")
+            .attr("class", "y-axis-label")
+            .attr("transform", "rotate(-90)")
+            .attr("y", -margin.left)
+            .attr("x", -height / 2)
+            .attr("dy", "1em")
+            .attr("text-anchor", "middle")
+            .text(dimensionName)
+            .style("font-family", "Arial, sans-serif")
+            .style("font-size", "12px")
+            .style("font-weight", "400")
+            .style("fill", "#000");
+
+          // Add x-axis label
+          svg.append("text")
+            .attr("class", "x-axis-label")
+            .attr("x", width / 2)
+            .attr("y", height + margin.bottom - 10)
+            .attr("text-anchor", "middle")
+            .text(measureName)
+            .style("font-family", "Arial, sans-serif")
+            .style("font-size", "12px")
+            .style("font-weight", "400")
+            .style("fill", "#000");
+
+          // Add tooltip div
+          const tooltip = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("position", "absolute")
+            .style("text-align", "center")
+            .style("width", "120px")
+            .style("height", "auto")
+            .style("padding", "5px")
+            .style("font", "12px sans-serif")
+            .style("background", "#262d33") // Change tooltip background color
+            .style("border", "0px")
+            .style("border-radius", "8px")
+            .style("pointer-events", "none")
+            .style("opacity", 0);
+        };
+
+        // Initial render
+        renderChart();
+
+        // Add resize event listener to make the chart responsive
+        window.addEventListener('resize', renderChart);
+
+        doneRendering();
+      }
+    }, 100);
   }
 });
-
-function formatContent(content) {
-  let formattedContent = '<div>';
-
-  // Split content by lines
-  const lines = content.split('\n');
-
-  lines.forEach(line => {
-      let cleanedLine = line.trim().replace(/^>\s*/, ''); // Remove '>' from the start
-
-      if (cleanedLine.startsWith('## ')) {
-          formattedContent += `<span style="font-size: 1.5em; font-weight: 400;">${cleanedLine.substring(3)}</span><br>`;
-      } else if (cleanedLine.includes('**')) {
-          cleanedLine = cleanedLine.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
-          formattedContent += `${cleanedLine}<br>`;
-      } else {
-          formattedContent += `${cleanedLine}<br>`;
-      }
-  });
-
-  formattedContent += '</div>';
-  return formattedContent;
-}
