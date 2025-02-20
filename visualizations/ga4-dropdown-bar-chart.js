@@ -36,7 +36,7 @@ looker.plugins.visualizations.add({
 
         // Extract all dimensions and measures dynamically
         const dimensions = queryResponse.fields.dimensions;
-        const measures = queryResponse.fields.measures;
+        const measures = [...queryResponse.fields.measures, ...queryResponse.fields.table_calculations];
 
         if (dimensions.length === 0 || measures.length === 0) {
           this.addError({ title: "No Data", message: "This visualization requires at least one dimension and one measure." });
@@ -156,8 +156,8 @@ looker.plugins.visualizations.add({
             //     .style("opacity", 0);
             // });
 
-          // Add value labels to each bar
-          svg.selectAll(".label")
+            // Add value labels to each bar
+            svg.selectAll(".label")
             .data(aggregatedData)
             .enter()
             .append("text")
@@ -166,7 +166,10 @@ looker.plugins.visualizations.add({
             .attr("y", d => y(d[dimensionName]) + y.bandwidth() / 2)
             .attr("dy", ".35em")
             .attr("text-anchor", "start")
-            .text(d => d3.format(",")(d[measureName])) // Format with commas
+            .text(d => {
+              const value = d[measureName];
+              return value >= 1 ? d3.format(",")(value) : d3.format(".2%")(value);
+            }) // Format with commas or percentage
             .style("font-family", "Arial, sans-serif")
             .style("font-size", "12px")
             .style("font-weight", "600")
