@@ -75,7 +75,7 @@ looker.plugins.visualizations.add({
           chartContainer.innerHTML = ''; // Clear previous chart
 
           // Set up the D3.js chart
-          const margin = { top: 10, right: 20, bottom: 40, left: 110 }; // Increase bottom margin for x-axis label
+          const margin = { top: 10, right: 40, bottom: 40, left: 135 }; // Increase bottom margin for x-axis label
           const width = chartContainer.clientWidth - margin.left - margin.right;
           const height = chartContainer.clientHeight - margin.top - margin.bottom;
 
@@ -121,40 +121,40 @@ looker.plugins.visualizations.add({
             .attr("width", d => x(d[measureName]))
             .attr("height", y.bandwidth())
             .attr("fill", "#1A73E8")
-            .on("mouseover", function(event, d) {
-              tooltip.transition()
-                .style("opacity", 1);
-              tooltip.html(`
-                <div style="text-align: left;">
-                  ${dimensionName}<br><strong>${d[dimensionName]}</strong><br><br>
-                  ${measureName}<br><strong>${d3.format(",")(d[measureName])}</strong>
-                </div>`);
+            // .on("mouseover", function(event, d) {
+            //   tooltip.transition()
+            //     .style("opacity", 1);
+            //   tooltip.html(`
+            //     <div style="text-align: left;">
+            //       ${dimensionName}<br><strong>${d[dimensionName]}</strong><br><br>
+            //       ${measureName}<br><strong>${d3.format(",")(d[measureName])}</strong>
+            //     </div>`);
 
-              // Calculate tooltip position
-              let tooltipX = event.pageX + 5;
-              let tooltipY = event.pageY - 28;
+            //   // Calculate tooltip position
+            //   let tooltipX = event.pageX + 5;
+            //   let tooltipY = event.pageY - 28;
 
-              // Ensure tooltip stays within the viewport
-              const tooltipWidth = tooltip.node().offsetWidth;
-              const tooltipHeight = tooltip.node().offsetHeight;
-              const windowWidth = window.innerWidth;
-              const windowHeight = window.innerHeight;
+            //   // Ensure tooltip stays within the viewport
+            //   const tooltipWidth = tooltip.node().offsetWidth;
+            //   const tooltipHeight = tooltip.node().offsetHeight;
+            //   const windowWidth = window.innerWidth;
+            //   const windowHeight = window.innerHeight;
 
-              if (tooltipX + tooltipWidth > windowWidth) {
-                tooltipX = windowWidth - tooltipWidth - 10;
-              }
-              if (tooltipY + tooltipHeight > windowHeight) {
-                tooltipY = windowHeight - tooltipHeight - 10;
-              }
+            //   if (tooltipX + tooltipWidth > windowWidth) {
+            //     tooltipX = windowWidth - tooltipWidth - 10;
+            //   }
+            //   if (tooltipY + tooltipHeight > windowHeight) {
+            //     tooltipY = windowHeight - tooltipHeight - 10;
+            //   }
 
-              tooltip.style("left", tooltipX + "px")
-                .style("top", tooltipY + "px")
-                .style("color", "white");
-            })
-            .on("mouseout", function(d) {
-              tooltip.transition()
-                .style("opacity", 0);
-            });
+            //   tooltip.style("left", tooltipX + "px")
+            //     .style("top", tooltipY + "px")
+            //     .style("color", "white");
+            // })
+            // .on("mouseout", function(d) {
+            //   tooltip.transition()
+            //     .style("opacity", 0);
+            // });
 
           // Add value labels to each bar
           svg.selectAll(".label")
@@ -214,20 +214,20 @@ looker.plugins.visualizations.add({
             .style("font-weight", "400")
             .style("fill", "#000");
 
-          // Add tooltip div
-          const tooltip = d3.select("body").append("div")
-            .attr("class", "tooltip")
-            .style("position", "absolute")
-            .style("text-align", "left") // Align text to the left
-            .style("min-width", "120px") // Set a minimum width
-            .style("height", "auto")
-            .style("padding", "15px 5px") // Add more margin for top and bottom
-            .style("font", "12px sans-serif")
-            .style("background", "#262d33") // Change tooltip background color
-            .style("border", "0px")
-            .style("border-radius", "8px")
-            .style("pointer-events", "none")
-            .style("opacity", 0);
+          // // Add tooltip div
+          // const tooltip = d3.select("body").append("div")
+          //   .attr("class", "tooltip")
+          //   .style("position", "absolute")
+          //   .style("text-align", "left") // Align text to the left
+          //   .style("min-width", "auto") // Set a minimum width
+          //   .style("height", "auto")
+          //   .style("padding", "15px 5px") // Add more margin for top and bottom
+          //   .style("font", "12px sans-serif")
+          //   .style("background", "#262d33") // Change tooltip background color
+          //   .style("border", "0px")
+          //   .style("border-radius", "8px")
+          //   .style("pointer-events", "none")
+          //   .style("opacity", 0);
         };
 
         // Initial render
