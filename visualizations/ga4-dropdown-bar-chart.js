@@ -65,7 +65,7 @@ looker.plugins.visualizations.add({
             data,
             v => d3.sum(v, d => d[measureName].value),
             d => d[dimensionName].value
-          ).map(([key, value]) => ({ [dimensionName]: key, [measureName]: value }));
+          ).map(([key, value]) => ({ [dimensionName]: key === null ? "N/A" : key, [measureName]: value }));
 
           // Limit the number of bars to 9
           aggregatedData = aggregatedData.slice(0, 9);
