@@ -4,10 +4,10 @@ looker.plugins.visualizations.add({
   create: function(element, config) {
     // Set up the chart container and dropdowns
     element.innerHTML = `
-      <div style="font-family: sans-serif;">
-                <select id="measure-select" style="font-family: sans-serif;"></select>
-        <span style="font-family: 'Poppins', sans-serif;"> &nbsp; by &nbsp; </span>
-                <select id="dimension-select" style="font-family: sans-serif;"></select>
+      <div style="font-family: 'Open Sans', sans-serif;">
+                <select id="measure-select" style="font-family: 'Open Sans', sans-serif;"></select>
+        <span style="font-family: 'Open Sans', sans-serif;"> &nbsp; by &nbsp; </span>
+                <select id="dimension-select" style="font-family: 'Open Sans', sans-serif;"></select>
       </div>
       <div class="chart-container" style="height: 85%; width: 100%; margin-top: 10px;">
         <!-- Chart will be rendered here -->
@@ -22,7 +22,7 @@ looker.plugins.visualizations.add({
 
     // Load custom font
     const fontLink = document.createElement('link');
-    fontLink.href = 'https://fonts.googleapis.com/css2?family=Poppins:wght@100;300;400;500;700&display=swap';
+    fontLink.href = 'https://fonts.googleapis.com/css2?family=Open+Sans:wght@100;300;400;500;700&display=swap';
     fontLink.rel = 'stylesheet';
     document.head.appendChild(fontLink);
   },
@@ -47,9 +47,16 @@ looker.plugins.visualizations.add({
         const dimensionSelect = element.querySelector('#dimension-select');
         const measureSelect = element.querySelector('#measure-select');
 
+        // Apply styles to the select elements
+        dimensionSelect.style.fontFamily = "'Open Sans', sans-serif";
+        dimensionSelect.style.fontWeight = "400";
+        dimensionSelect.style.fontSize = "14px";
+        measureSelect.style.fontFamily = "'Open Sans', sans-serif";
+        measureSelect.style.fontWeight = "400";
+        measureSelect.style.fontSize = "14px";
+
         dimensionSelect.innerHTML = dimensions.map(dim => `<option value="${dim.name}">${dim.label}</option>`).join('');
         measureSelect.innerHTML = measures.map(meas => `<option value="${meas.name}">${meas.label}</option>`).join('');
-
         // Add event listeners to the dropdowns
         dimensionSelect.addEventListener('change', () => renderChart());
         measureSelect.addEventListener('change', () => renderChart());
@@ -59,6 +66,10 @@ looker.plugins.visualizations.add({
           // Get the selected dimension and measure
           const dimensionName = dimensionSelect.value || dimensions[0].name;
           const measureName = measureSelect.value || measures[0].name;
+
+          // Get the selected dimension and measure labels
+          const dimensionLabel = dimensionSelect.options[dimensionSelect.selectedIndex].text;
+          const measureLabel = measureSelect.options[measureSelect.selectedIndex].text;
 
           // Process the data to create the chart-friendly structure
           let aggregatedData = d3.rollups(
@@ -101,11 +112,12 @@ looker.plugins.visualizations.add({
           svg.append("g")
           .attr("class", "grid")
           .call(d3.axisBottom(x)
-            .ticks(3)
-            .tickSize(height)
-            .tickFormat(d3.format(",d")))
+          .ticks(3)
+          .tickSize(height)
+          .tickFormat(d3.format(",d")))
           .selectAll("line")
-          .attr("stroke", "lightgrey");
+          .attr("stroke", "lightgrey")
+          .style("font-family", "Roboto, sans-serif"); // Change font to Roboto
 
           // Remove the x-axis line
           svg.selectAll(".domain").remove(); // Remove the x-axis line
@@ -121,40 +133,40 @@ looker.plugins.visualizations.add({
             .attr("width", d => x(d[measureName]))
             .attr("height", y.bandwidth())
             .attr("fill", "#1A73E8")
-            // .on("mouseover", function(event, d) {
-            //   tooltip.transition()
-            //     .style("opacity", 1);
-            //   tooltip.html(`
-            //     <div style="text-align: left;">
-            //       ${dimensionName}<br><strong>${d[dimensionName]}</strong><br><br>
-            //       ${measureName}<br><strong>${d3.format(",")(d[measureName])}</strong>
-            //     </div>`);
+            .on("mouseover", function(event, d) {
+              tooltip.transition()
+                .style("opacity", 1);
+              tooltip.html(`
+                <div style="text-align: left;">
+                  ${dimensionName}<br><strong>${d[dimensionName]}</strong><br><br>
+                  ${measureName}<br><strong>${d3.format(",")(d[measureName])}</strong>
+                </div>`);
 
-            //   // Calculate tooltip position
-            //   let tooltipX = event.pageX + 5;
-            //   let tooltipY = event.pageY - 28;
+              // Calculate tooltip position
+              let tooltipX = event.pageX + 5;
+              let tooltipY = event.pageY - 28;
 
-            //   // Ensure tooltip stays within the viewport
-            //   const tooltipWidth = tooltip.node().offsetWidth;
-            //   const tooltipHeight = tooltip.node().offsetHeight;
-            //   const windowWidth = window.innerWidth;
-            //   const windowHeight = window.innerHeight;
+              // Ensure tooltip stays within the viewport
+              const tooltipWidth = tooltip.node().offsetWidth;
+              const tooltipHeight = tooltip.node().offsetHeight;
+              const windowWidth = window.innerWidth;
+              const windowHeight = window.innerHeight;
 
-            //   if (tooltipX + tooltipWidth > windowWidth) {
-            //     tooltipX = windowWidth - tooltipWidth - 10;
-            //   }
-            //   if (tooltipY + tooltipHeight > windowHeight) {
-            //     tooltipY = windowHeight - tooltipHeight - 10;
-            //   }
+              if (tooltipX + tooltipWidth > windowWidth) {
+                tooltipX = windowWidth - tooltipWidth - 10;
+              }
+              if (tooltipY + tooltipHeight > windowHeight) {
+                tooltipY = windowHeight - tooltipHeight - 10;
+              }
 
-            //   tooltip.style("left", tooltipX + "px")
-            //     .style("top", tooltipY + "px")
-            //     .style("color", "white");
-            // })
-            // .on("mouseout", function(d) {
-            //   tooltip.transition()
-            //     .style("opacity", 0);
-            // });
+              tooltip.style("left", tooltipX + "px")
+                .style("top", tooltipY + "px")
+                .style("color", "white");
+            })
+            .on("mouseout", function(d) {
+              tooltip.transition()
+                .style("opacity", 0);
+            });
 
             // Add value labels to each bar
             svg.selectAll(".label")
@@ -170,7 +182,7 @@ looker.plugins.visualizations.add({
               const value = d[measureName];
               return value >= 1 ? d3.format(",")(value) : d3.format(".2%")(value);
             }) // Format with commas or percentage
-            .style("font-family", "Arial, sans-serif")
+            .style("font-family", "Roboto, sans-serif")
             .style("font-size", "12px")
             .style("font-weight", "600")
             .style("fill", "#1A73E8");
@@ -186,7 +198,7 @@ looker.plugins.visualizations.add({
             .attr("dy", ".35em")
             .attr("text-anchor", "end")
             .text(d => d[dimensionName].length > 15 ? d[dimensionName].substring(0, 15) + '...' : d[dimensionName])
-            .style("font-family", "sans-serif")
+            .style("font-family", "'Open Sans', sans-serif")
             .style("font-size", "12px")
             .style("font-weight", "400")
             .style("fill", "#000");
@@ -199,8 +211,8 @@ looker.plugins.visualizations.add({
             .attr("x", -height / 2)
             .attr("dy", "1em")
             .attr("text-anchor", "middle")
-            .text(dimensionName)
-            .style("font-family", "sans-serif")
+            .text(dimensionLabel)
+            .style("font-family", "'Open Sans', sans-serif")
             .style("font-size", "12px")
             .style("font-weight", "400")
             .style("fill", "#000");
@@ -211,26 +223,26 @@ looker.plugins.visualizations.add({
             .attr("x", width / 2)
             .attr("y", height + margin.bottom - 10)
             .attr("text-anchor", "middle")
-            .text(measureName)
-            .style("font-family", "sans-serif")
+            .text(measureLabel)
+            .style("font-family", "'Open Sans', sans-serif")
             .style("font-size", "12px")
             .style("font-weight", "400")
             .style("fill", "#000");
 
-          // // Add tooltip div
-          // const tooltip = d3.select("body").append("div")
-          //   .attr("class", "tooltip")
-          //   .style("position", "absolute")
-          //   .style("text-align", "left") // Align text to the left
-          //   .style("min-width", "auto") // Set a minimum width
-          //   .style("height", "auto")
-          //   .style("padding", "15px 5px") // Add more margin for top and bottom
-          //   .style("font", "12px sans-serif")
-          //   .style("background", "#262d33") // Change tooltip background color
-          //   .style("border", "0px")
-          //   .style("border-radius", "8px")
-          //   .style("pointer-events", "none")
-          //   .style("opacity", 0);
+          // Add tooltip div
+          const tooltip = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("position", "absolute")
+            .style("text-align", "left") // Align text to the left
+            .style("width", "auto") // Set a minimum width
+            .style("height", "auto")
+            .style("padding", "5px 5px") // Add more margin for top and bottom
+            .style("font", "12px sans-serif")
+            .style("background", "#262d33") // Change tooltip background color
+            .style("border", "0px")
+            .style("border-radius", "8px")
+            .style("pointer-events", "none")
+            .style("opacity", 0);
         };
 
         // Initial render
