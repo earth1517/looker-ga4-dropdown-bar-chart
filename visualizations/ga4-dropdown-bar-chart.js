@@ -85,6 +85,10 @@ looker.plugins.visualizations.add({
           const chartContainer = element.querySelector('.chart-container');
           chartContainer.innerHTML = ''; // Clear previous chart
 
+          // Adjust the height of the chart container based on the dropdown menu section
+          const dropdownHeight = element.querySelector('div').offsetHeight;
+          chartContainer.style.height = `calc(100% - ${dropdownHeight}px)`;
+
           // Set up the D3.js chart
           const margin = { top: 10, right: 40, bottom: 40, left: 135 }; // Increase bottom margin for x-axis label
           const width = chartContainer.clientWidth - margin.left - margin.right;
