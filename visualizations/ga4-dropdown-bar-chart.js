@@ -121,7 +121,8 @@ looker.plugins.visualizations.add({
           .tickFormat(d3.format(",d")))
           .selectAll("line")
           .attr("stroke", "lightgrey")
-          .style("font-family", "Roboto, sans-serif");
+          .style("font-family", "Roboto, sans-serif")
+          .style("font-size", "12px");
 
           // Remove the x-axis line
           svg.selectAll(".domain").remove(); // Remove the x-axis line
