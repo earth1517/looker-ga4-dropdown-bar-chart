@@ -50,10 +50,10 @@ looker.plugins.visualizations.add({
         // Apply styles to the select elements
         dimensionSelect.style.fontFamily = "'Open Sans', sans-serif";
         dimensionSelect.style.fontWeight = "400";
-        dimensionSelect.style.fontSize = "14px";
+        dimensionSelect.style.fontSize = "12px";
         measureSelect.style.fontFamily = "'Open Sans', sans-serif";
         measureSelect.style.fontWeight = "400";
-        measureSelect.style.fontSize = "14px";
+        measureSelect.style.fontSize = "12px";
 
         dimensionSelect.innerHTML = dimensions.map(dim => `<option value="${dim.name}">${dim.label}</option>`).join('');
         measureSelect.innerHTML = measures.map(meas => `<option value="${meas.name}">${meas.label}</option>`).join('');
@@ -138,6 +138,7 @@ looker.plugins.visualizations.add({
             .attr("height", y.bandwidth())
             .attr("fill", "#1A73E8")
             .on("mouseover", function(event, d) {
+              d3.select(this).attr("fill", "#458bfc"); // Change bar color on hover
               tooltip.transition()
                 .style("opacity", 1);
               tooltip.html(`
@@ -168,6 +169,7 @@ looker.plugins.visualizations.add({
                 .style("color", "white");
             })
             .on("mouseout", function(d) {
+              d3.select(this).attr("fill", "#1A73E8"); // Revert bar color on mouse out
               tooltip.transition()
                 .style("opacity", 0);
             });
