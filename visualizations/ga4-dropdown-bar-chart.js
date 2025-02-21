@@ -9,7 +9,7 @@ looker.plugins.visualizations.add({
         <span style="font-family: 'Open Sans', sans-serif;"> &nbsp; by &nbsp; </span>
                 <select id="dimension-select" style="font-family: 'Open Sans', sans-serif;"></select>
       </div>
-      <div class="chart-container" style="height: 85%; width: 100%; margin-top: 10px;">
+      <div class="chart-container" style="height: 90%; width: 100%; margin-top: 10px;">
         <!-- Chart will be rendered here -->
       </div>
     `;
@@ -117,7 +117,7 @@ looker.plugins.visualizations.add({
           .tickFormat(d3.format(",d")))
           .selectAll("line")
           .attr("stroke", "lightgrey")
-          .style("font-family", "Roboto, sans-serif"); // Change font to Roboto
+          .style("font-family", "Roboto, sans-serif");
 
           // Remove the x-axis line
           svg.selectAll(".domain").remove(); // Remove the x-axis line
@@ -212,21 +212,21 @@ looker.plugins.visualizations.add({
             .attr("dy", "1em")
             .attr("text-anchor", "middle")
             .text(dimensionLabel)
-            .style("font-family", "'Open Sans', sans-serif")
+            .style("font-family", "Roboto, sans-serif")
             .style("font-size", "12px")
-            .style("font-weight", "400")
+            .style("font-weight", "100")
             .style("fill", "#000");
 
           // Add x-axis label
           svg.append("text")
             .attr("class", "x-axis-label")
             .attr("x", width / 2)
-            .attr("y", height + margin.bottom - 10)
+            .attr("y", height + margin.bottom)
             .attr("text-anchor", "middle")
             .text(measureLabel)
-            .style("font-family", "'Open Sans', sans-serif")
+            .style("font-family", "Roboto, sans-serif")
             .style("font-size", "12px")
-            .style("font-weight", "400")
+            .style("font-weight", "100")
             .style("fill", "#000");
 
           // Add tooltip div
